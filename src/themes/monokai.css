@@ -1,0 +1,202 @@
+/* ============================================================
+   SimpleMD — Monokai Theme
+   Classic Monokai — originally by Wimer Hazenberg
+   ============================================================ */
+
+.theme-monokai {
+  --bg: #272822;
+  --fg: #f8f8f2;
+  --fg-muted: #75715e;
+  --accent: #a6e22e;
+  --accent-hover: #90cc28;
+  --border: #3e3d32;
+
+  --sidebar-bg: #1e1f1a;
+  --editor-bg: #272822;
+  --toolbar-bg: #1e1f1a;
+  --statusbar-bg: #1a1a15;
+  --outline-bg: #1e1f1a;
+
+  --content-bg: #272822;
+  --code-bg: #3e3d32;
+  --code-fg: #f8f8f2;
+  --blockquote-border: #a6e22e;
+  --blockquote-fg: #75715e;
+  --link-color: #66d9e8;
+  --selection-bg: rgba(73, 72, 62, 0.9);
+  --heading-fg: #f8f8f2;
+  --table-border: #49483e;
+  --table-stripe: #302f2a;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
+}
+
+/* --- Markdown content styles --- */
+
+/* Headings */
+.theme-monokai .cm-content .cm-header-1,
+.theme-monokai .cm-content .cm-heading-1 {
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-monokai .cm-content .cm-header-2,
+.theme-monokai .cm-content .cm-heading-2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 20px;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+
+.theme-monokai .cm-content .cm-header-3,
+.theme-monokai .cm-content .cm-heading-3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 18px;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.theme-monokai .cm-content .cm-header-4,
+.theme-monokai .cm-content .cm-heading-4 {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.theme-monokai .cm-content .cm-header-5,
+.theme-monokai .cm-content .cm-heading-5 {
+  font-size: 0.875em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.theme-monokai .cm-content .cm-header-6,
+.theme-monokai .cm-content .cm-heading-6 {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+/* Inline code */
+.theme-monokai .cm-content .cm-inline-code,
+.theme-monokai .cm-content .ͼ1i {
+  background: var(--code-bg);
+  color: #f92672;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* Code blocks */
+.theme-monokai .cm-content .cm-codeblock,
+.theme-monokai .cm-line.cm-codeblock {
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--code-fg);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+/* Syntax highlighting — Monokai palette */
+.theme-monokai .cm-content .cm-keyword { color: #f92672; }
+.theme-monokai .cm-content .cm-string { color: #e6db74; }
+.theme-monokai .cm-content .cm-number { color: #ae81ff; }
+.theme-monokai .cm-content .cm-comment { color: #75715e; }
+.theme-monokai .cm-content .cm-variableName { color: #f8f8f2; }
+.theme-monokai .cm-content .cm-typeName { color: #66d9e8; }
+.theme-monokai .cm-content .cm-function { color: #a6e22e; }
+.theme-monokai .cm-content .cm-operator { color: #f92672; }
+
+/* Links */
+.theme-monokai .cm-content .cm-link,
+.theme-monokai .cm-content .cm-url {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+/* Blockquote */
+.theme-monokai .cm-content .cm-quote {
+  color: var(--blockquote-fg);
+  border-left: 3px solid var(--blockquote-border);
+  padding-left: 12px;
+}
+
+/* Bold */
+.theme-monokai .cm-content .cm-strong {
+  font-weight: 700;
+  color: var(--heading-fg);
+}
+
+/* Italic */
+.theme-monokai .cm-content .cm-em {
+  font-style: italic;
+  color: #e6db74;
+}
+
+/* Strikethrough */
+.theme-monokai .cm-content .cm-strikethrough {
+  text-decoration: line-through;
+  color: var(--fg-muted);
+}
+
+/* Horizontal rule */
+.theme-monokai .cm-content .cm-hr {
+  border-top: 2px solid var(--border);
+  margin: 24px 0;
+}
+
+/* Tables */
+.theme-monokai .cm-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.theme-monokai .cm-content table th,
+.theme-monokai .cm-content table td {
+  border: 1px solid var(--table-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.theme-monokai .cm-content table th {
+  background: var(--code-bg);
+  font-weight: 600;
+}
+
+.theme-monokai .cm-content table tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* Task lists */
+.theme-monokai .cm-content input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin-right: 6px;
+  transform: scale(1.1);
+}
+
+/* Images */
+.theme-monokai .cm-content .cm-image {
+  color: var(--accent);
+}
+
+/* Meta / formatting markers */
+.theme-monokai .cm-content .cm-formatting {
+  color: var(--fg-muted);
+  opacity: 0.4;
+}

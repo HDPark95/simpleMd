@@ -1,0 +1,200 @@
+/* ============================================================
+   SimpleMD — Light Theme (Typora-inspired)
+   ============================================================ */
+
+.theme-light {
+  --bg: #ffffff;
+  --fg: #333333;
+  --fg-muted: #666666;
+  --accent: #4a9eff;
+  --accent-hover: #3a8eef;
+  --border: #e5e5e5;
+
+  --sidebar-bg: #f7f7f7;
+  --editor-bg: #ffffff;
+  --toolbar-bg: #fafafa;
+  --statusbar-bg: #f5f5f5;
+  --outline-bg: #f7f7f7;
+
+  --content-bg: #ffffff;
+  --code-bg: #f6f8fa;
+  --code-fg: #333333;
+  --blockquote-border: #4a9eff;
+  --blockquote-fg: #666666;
+  --link-color: #4a9eff;
+  --selection-bg: rgba(74, 158, 255, 0.25);
+  --heading-fg: #1a1a1a;
+  --table-border: #e5e5e5;
+  --table-stripe: #f9f9f9;
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+}
+
+/* --- Markdown content styles (inside CodeMirror) --- */
+
+/* Headings */
+.theme-light .cm-content .cm-header-1,
+.theme-light .cm-content .cm-heading-1 {
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-light .cm-content .cm-header-2,
+.theme-light .cm-content .cm-heading-2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 20px;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+
+.theme-light .cm-content .cm-header-3,
+.theme-light .cm-content .cm-heading-3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 18px;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.theme-light .cm-content .cm-header-4,
+.theme-light .cm-content .cm-heading-4 {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.theme-light .cm-content .cm-header-5,
+.theme-light .cm-content .cm-heading-5 {
+  font-size: 0.875em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.theme-light .cm-content .cm-header-6,
+.theme-light .cm-content .cm-heading-6 {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+/* Inline code */
+.theme-light .cm-content .cm-inline-code,
+.theme-light .cm-content .ͼ1i {
+  background: var(--code-bg);
+  color: #e01e5a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* Code blocks */
+.theme-light .cm-content .cm-codeblock,
+.theme-light .cm-line.cm-codeblock {
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--code-fg);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+/* Syntax highlighting in code blocks */
+.theme-light .cm-content .cm-keyword { color: #d73a49; }
+.theme-light .cm-content .cm-string { color: #032f62; }
+.theme-light .cm-content .cm-number { color: #005cc5; }
+.theme-light .cm-content .cm-comment { color: #6a737d; }
+.theme-light .cm-content .cm-variableName { color: #e36209; }
+.theme-light .cm-content .cm-typeName { color: #6f42c1; }
+.theme-light .cm-content .cm-function { color: #6f42c1; }
+.theme-light .cm-content .cm-operator { color: #d73a49; }
+
+/* Links */
+.theme-light .cm-content .cm-link,
+.theme-light .cm-content .cm-url {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+/* Blockquote */
+.theme-light .cm-content .cm-quote {
+  color: var(--blockquote-fg);
+  border-left: 3px solid var(--blockquote-border);
+  padding-left: 12px;
+}
+
+/* Bold */
+.theme-light .cm-content .cm-strong {
+  font-weight: 700;
+  color: var(--heading-fg);
+}
+
+/* Italic */
+.theme-light .cm-content .cm-em {
+  font-style: italic;
+}
+
+/* Strikethrough */
+.theme-light .cm-content .cm-strikethrough {
+  text-decoration: line-through;
+  color: var(--fg-muted);
+}
+
+/* Horizontal rule */
+.theme-light .cm-content .cm-hr {
+  border-top: 2px solid var(--border);
+  margin: 24px 0;
+}
+
+/* Tables */
+.theme-light .cm-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.theme-light .cm-content table th,
+.theme-light .cm-content table td {
+  border: 1px solid var(--table-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.theme-light .cm-content table th {
+  background: var(--code-bg);
+  font-weight: 600;
+}
+
+.theme-light .cm-content table tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* Task lists */
+.theme-light .cm-content input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin-right: 6px;
+  transform: scale(1.1);
+}
+
+/* Images */
+.theme-light .cm-content .cm-image {
+  color: var(--accent);
+}
+
+/* Meta / formatting markers */
+.theme-light .cm-content .cm-formatting {
+  color: var(--fg-muted);
+  opacity: 0.5;
+}

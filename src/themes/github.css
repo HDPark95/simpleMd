@@ -1,0 +1,212 @@
+/* ============================================================
+   SimpleMD — GitHub Theme
+   ============================================================ */
+
+.theme-github {
+  --bg: #ffffff;
+  --fg: #24292e;
+  --fg-muted: #586069;
+  --accent: #0366d6;
+  --accent-hover: #0256b9;
+  --border: #e1e4e8;
+
+  --sidebar-bg: #f6f8fa;
+  --editor-bg: #ffffff;
+  --toolbar-bg: #fafbfc;
+  --statusbar-bg: #f6f8fa;
+  --outline-bg: #f6f8fa;
+
+  --content-bg: #ffffff;
+  --code-bg: #f6f8fa;
+  --code-fg: #24292e;
+  --blockquote-border: #dfe2e5;
+  --blockquote-fg: #6a737d;
+  --link-color: #0366d6;
+  --selection-bg: rgba(3, 102, 214, 0.2);
+  --heading-fg: #24292e;
+  --table-border: #dfe2e5;
+  --table-stripe: #f6f8fa;
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.12);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+}
+
+/* --- Markdown content styles (GitHub-flavored) --- */
+
+/* Headings */
+.theme-github .cm-content .cm-header-1,
+.theme-github .cm-content .cm-heading-1 {
+  font-size: 2em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-github .cm-content .cm-header-2,
+.theme-github .cm-content .cm-heading-2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-github .cm-content .cm-header-3,
+.theme-github .cm-content .cm-heading-3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+
+.theme-github .cm-content .cm-header-4,
+.theme-github .cm-content .cm-heading-4 {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.theme-github .cm-content .cm-header-5,
+.theme-github .cm-content .cm-heading-5 {
+  font-size: 0.875em;
+  font-weight: 600;
+  color: var(--heading-fg);
+}
+
+.theme-github .cm-content .cm-header-6,
+.theme-github .cm-content .cm-heading-6 {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+/* Inline code — GitHub style */
+.theme-github .cm-content .cm-inline-code,
+.theme-github .cm-content .ͼ1i {
+  background: rgba(27, 31, 35, 0.05);
+  color: var(--code-fg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 85%;
+}
+
+/* Code blocks */
+.theme-github .cm-content .cm-codeblock,
+.theme-github .cm-line.cm-codeblock {
+  background: var(--code-bg);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 85%;
+  color: var(--code-fg);
+  border-radius: 6px;
+  padding: 2px 8px;
+  line-height: 1.45;
+}
+
+/* Syntax highlighting — GitHub-inspired */
+.theme-github .cm-content .cm-keyword { color: #d73a49; }
+.theme-github .cm-content .cm-string { color: #032f62; }
+.theme-github .cm-content .cm-number { color: #005cc5; }
+.theme-github .cm-content .cm-comment { color: #6a737d; }
+.theme-github .cm-content .cm-variableName { color: #e36209; }
+.theme-github .cm-content .cm-typeName { color: #6f42c1; }
+.theme-github .cm-content .cm-function { color: #6f42c1; }
+.theme-github .cm-content .cm-operator { color: #d73a49; }
+
+/* Links */
+.theme-github .cm-content .cm-link,
+.theme-github .cm-content .cm-url {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.theme-github .cm-content .cm-link:hover,
+.theme-github .cm-content .cm-url:hover {
+  text-decoration: underline;
+}
+
+/* Blockquote */
+.theme-github .cm-content .cm-quote {
+  color: var(--blockquote-fg);
+  border-left: 4px solid var(--blockquote-border);
+  padding-left: 16px;
+}
+
+/* Bold */
+.theme-github .cm-content .cm-strong {
+  font-weight: 600;
+  color: var(--heading-fg);
+}
+
+/* Italic */
+.theme-github .cm-content .cm-em {
+  font-style: italic;
+}
+
+/* Strikethrough */
+.theme-github .cm-content .cm-strikethrough {
+  text-decoration: line-through;
+  color: var(--fg-muted);
+}
+
+/* Horizontal rule */
+.theme-github .cm-content .cm-hr {
+  border: 0;
+  border-top: 4px solid var(--border);
+  margin: 24px 0;
+  padding: 0;
+}
+
+/* Tables — GitHub style with full borders */
+.theme-github .cm-content table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.theme-github .cm-content table th,
+.theme-github .cm-content table td {
+  border: 1px solid var(--table-border);
+  padding: 6px 13px;
+  text-align: left;
+}
+
+.theme-github .cm-content table th {
+  font-weight: 600;
+  background: var(--table-stripe);
+}
+
+.theme-github .cm-content table tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* Task lists — GitHub checkbox style */
+.theme-github .cm-content input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin-right: 4px;
+  position: relative;
+  top: 1px;
+}
+
+/* Images */
+.theme-github .cm-content .cm-image {
+  color: var(--accent);
+}
+
+/* Meta / formatting markers */
+.theme-github .cm-content .cm-formatting {
+  color: var(--fg-muted);
+  opacity: 0.4;
+}

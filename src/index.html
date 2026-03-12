@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimpleMD</title>
+  <link rel="stylesheet" href="./styles/global.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="sidebar" class="sidebar hidden">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Files</span>
+        <button id="btn-open-folder" class="sidebar-btn" title="Open Folder">+</button>
+      </div>
+      <div id="file-tree" class="file-tree"></div>
+    </div>
+    <div id="editor-area" class="editor-area">
+      <div id="toolbar" class="toolbar">
+        <div id="toolbar-format-buttons" class="toolbar-format-group">
+          <button data-action="bold" title="Bold (Cmd+B)"><b>B</b></button>
+          <button data-action="italic" title="Italic (Cmd+I)"><i>I</i></button>
+          <button data-action="strikethrough" title="Strikethrough"><s>S</s></button>
+          <button data-action="code" title="Inline Code">&lt;/&gt;</button>
+          <span class="toolbar-sep"></span>
+          <button data-action="heading1" title="Heading 1">H1</button>
+          <button data-action="heading2" title="Heading 2">H2</button>
+          <button data-action="heading3" title="Heading 3">H3</button>
+          <span class="toolbar-sep"></span>
+          <button data-action="bulletList" title="Bullet List">&#8226;</button>
+          <button data-action="orderedList" title="Ordered List">1.</button>
+          <button data-action="taskList" title="Task List">&#9745;</button>
+          <span class="toolbar-sep"></span>
+          <button data-action="blockquote" title="Blockquote">&ldquo;</button>
+          <button data-action="table" title="Table">&#9638;</button>
+          <button data-action="codeBlock" title="Code Block">{}</button>
+          <button data-action="link" title="Link (Cmd+K)"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.354 5.5H4a3 3 0 000 6h3a3 3 0 002.83-4H9.4a2 2 0 01-1.9 3H4a2 2 0 110-4h2.354zM9.646 10.5H12a3 3 0 000-6H9a3 3 0 00-2.83 4h.44a2 2 0 011.9-3H12a2 2 0 110 4H9.646z"/></svg></button>
+          <button data-action="image" title="Image"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3h-13A1.5 1.5 0 000 4.5v7A1.5 1.5 0 001.5 13h13a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0014.5 3zm-13 1h13a.5.5 0 01.5.5v4.793l-2.146-2.147a.5.5 0 00-.708 0L8.5 10.793 6.354 8.646a.5.5 0 00-.708 0L1 13.293V4.5a.5.5 0 01.5-.5z"/><circle cx="4.5" cy="6.5" r="1.5"/></svg></button>
+          <button data-action="horizontalRule" title="Horizontal Rule">&mdash;</button>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <div class="toolbar-mode-toggle">
+          <button id="toolbar-view-btn" class="toolbar-mode-btn toolbar-mode-btn--view" title="Switch to Viewer Mode (Cmd+E)">View</button>
+          <button id="toolbar-edit-btn" class="toolbar-mode-btn toolbar-mode-btn--edit" title="Switch to Edit Mode (Cmd+E)" style="display:none">Edit</button>
+        </div>
+      </div>
+      <div id="editor-container" class="editor-container"></div>
+      <div id="statusbar" class="statusbar">
+        <span id="status-file">Untitled</span>
+        <span id="status-modified"></span>
+        <span class="statusbar-spacer"></span>
+        <span id="status-cursor">Ln 1, Col 1</span>
+        <span id="status-words">0 words</span>
+        <span id="status-chars">0 chars</span>
+        <span id="status-mode" class="status-mode status-mode--viewer">Read Only</span>
+      </div>
+    </div>
+    <div id="outline" class="outline hidden">
+      <div class="outline-header">Outline</div>
+      <div id="outline-content" class="outline-content"></div>
+    </div>
+  </div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

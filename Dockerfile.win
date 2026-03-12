@@ -1,0 +1,8 @@
+FROM electronuserland/builder:wine
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+RUN npx electron-builder --win --publish never

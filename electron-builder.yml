@@ -1,0 +1,57 @@
+appId: com.simplemd.app
+productName: SimpleMD
+directories:
+  output: release
+  buildResources: resources
+asar: true
+asarUnpack:
+  - "dist/renderer/assets/**"
+files:
+  - dist/**/*
+  - package.json
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip
+  icon: resources/icon.icns
+  extendInfo:
+    CFBundleDocumentTypes:
+      - CFBundleTypeName: Markdown Document
+        CFBundleTypeRole: Editor
+        LSHandlerRank: Owner
+        LSItemContentTypes:
+          - net.daringfireball.markdown
+          - public.plain-text
+        CFBundleTypeExtensions:
+          - md
+          - markdown
+          - mdown
+          - mkd
+          - mdx
+          - txt
+    UTExportedTypeDeclarations:
+      - UTTypeIdentifier: net.daringfireball.markdown
+        UTTypeDescription: Markdown Document
+        UTTypeConformsTo:
+          - public.plain-text
+        UTTypeTagSpecification:
+          public.filename-extension:
+            - md
+            - markdown
+            - mdown
+            - mkd
+win:
+  target:
+    - nsis
+    - zip
+  icon: resources/icon.ico
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development
+  icon: resources/icon.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

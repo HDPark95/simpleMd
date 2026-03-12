@@ -1,0 +1,203 @@
+/* ============================================================
+   SimpleMD — Nord Theme
+   https://www.nordtheme.com
+   Palette: Polar Night, Snow Storm, Frost, Aurora
+   ============================================================ */
+
+.theme-nord {
+  --bg: #2e3440;
+  --fg: #d8dee9;
+  --fg-muted: #4c566a;
+  --accent: #88c0d0;
+  --accent-hover: #7ab0c0;
+  --border: #3b4252;
+
+  --sidebar-bg: #272c36;
+  --editor-bg: #2e3440;
+  --toolbar-bg: #272c36;
+  --statusbar-bg: #232730;
+  --outline-bg: #272c36;
+
+  --content-bg: #2e3440;
+  --code-bg: #3b4252;
+  --code-fg: #d8dee9;
+  --blockquote-border: #88c0d0;
+  --blockquote-fg: #4c566a;
+  --link-color: #88c0d0;
+  --selection-bg: rgba(136, 192, 208, 0.2);
+  --heading-fg: #eceff4;
+  --table-border: #434c5e;
+  --table-stripe: #353a47;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
+}
+
+/* --- Markdown content styles --- */
+
+/* Headings */
+.theme-nord .cm-content .cm-header-1,
+.theme-nord .cm-content .cm-heading-1 {
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--heading-fg);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-nord .cm-content .cm-header-2,
+.theme-nord .cm-content .cm-heading-2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 20px;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+
+.theme-nord .cm-content .cm-header-3,
+.theme-nord .cm-content .cm-heading-3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 18px;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.theme-nord .cm-content .cm-header-4,
+.theme-nord .cm-content .cm-heading-4 {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--heading-fg);
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.theme-nord .cm-content .cm-header-5,
+.theme-nord .cm-content .cm-heading-5 {
+  font-size: 0.875em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.theme-nord .cm-content .cm-header-6,
+.theme-nord .cm-content .cm-heading-6 {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+/* Inline code */
+.theme-nord .cm-content .cm-inline-code,
+.theme-nord .cm-content .ͼ1i {
+  background: var(--code-bg);
+  color: #81a1c1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* Code blocks */
+.theme-nord .cm-content .cm-codeblock,
+.theme-nord .cm-line.cm-codeblock {
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--code-fg);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+/* Syntax highlighting — Nord Aurora palette */
+.theme-nord .cm-content .cm-keyword { color: #81a1c1; }
+.theme-nord .cm-content .cm-string { color: #a3be8c; }
+.theme-nord .cm-content .cm-number { color: #b48ead; }
+.theme-nord .cm-content .cm-comment { color: #4c566a; }
+.theme-nord .cm-content .cm-variableName { color: #d8dee9; }
+.theme-nord .cm-content .cm-typeName { color: #8fbcbb; }
+.theme-nord .cm-content .cm-function { color: #88c0d0; }
+.theme-nord .cm-content .cm-operator { color: #81a1c1; }
+
+/* Links */
+.theme-nord .cm-content .cm-link,
+.theme-nord .cm-content .cm-url {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+/* Blockquote */
+.theme-nord .cm-content .cm-quote {
+  color: var(--blockquote-fg);
+  border-left: 3px solid var(--blockquote-border);
+  padding-left: 12px;
+}
+
+/* Bold */
+.theme-nord .cm-content .cm-strong {
+  font-weight: 700;
+  color: var(--heading-fg);
+}
+
+/* Italic */
+.theme-nord .cm-content .cm-em {
+  font-style: italic;
+  color: #ebcb8b;
+}
+
+/* Strikethrough */
+.theme-nord .cm-content .cm-strikethrough {
+  text-decoration: line-through;
+  color: var(--fg-muted);
+}
+
+/* Horizontal rule */
+.theme-nord .cm-content .cm-hr {
+  border-top: 2px solid var(--border);
+  margin: 24px 0;
+}
+
+/* Tables */
+.theme-nord .cm-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.theme-nord .cm-content table th,
+.theme-nord .cm-content table td {
+  border: 1px solid var(--table-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.theme-nord .cm-content table th {
+  background: var(--code-bg);
+  font-weight: 600;
+}
+
+.theme-nord .cm-content table tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* Task lists */
+.theme-nord .cm-content input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin-right: 6px;
+  transform: scale(1.1);
+}
+
+/* Images */
+.theme-nord .cm-content .cm-image {
+  color: var(--accent);
+}
+
+/* Meta / formatting markers */
+.theme-nord .cm-content .cm-formatting {
+  color: var(--fg-muted);
+  opacity: 0.5;
+}
