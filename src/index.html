@@ -16,8 +16,16 @@
       </div>
       <div id="file-tree" class="file-tree"></div>
     </div>
+    <div id="sidebar-resizer" class="sidebar-resizer hidden" role="separator" aria-orientation="vertical" title="Resize Sidebar"></div>
     <div id="editor-area" class="editor-area">
       <div id="toolbar" class="toolbar">
+        <button id="btn-toggle-sidebar" class="toolbar-sidebar-btn" title="Toggle Sidebar (Ctrl+\)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="1" y="2" width="5" height="12" rx="0" fill="currentColor" opacity="0.3"/>
+          </svg>
+        </button>
+        <span class="toolbar-sep"></span>
         <div id="toolbar-format-buttons" class="toolbar-format-group">
           <button data-action="bold" title="Bold (Cmd+B)"><b>B</b></button>
           <button data-action="italic" title="Italic (Cmd+I)"><i>I</i></button>
@@ -44,6 +52,10 @@
           <button id="toolbar-view-btn" class="toolbar-mode-btn toolbar-mode-btn--view" title="Switch to Viewer Mode (Cmd+E)">View</button>
           <button id="toolbar-edit-btn" class="toolbar-mode-btn toolbar-mode-btn--edit" title="Switch to Edit Mode (Cmd+E)" style="display:none">Edit</button>
         </div>
+      </div>
+      <div id="tabbar" class="tabbar">
+        <div id="tabbar-list" class="tabbar-list"></div>
+        <button id="tabbar-new" class="tabbar-new" title="New Tab (Ctrl+T)">+</button>
       </div>
       <div id="editor-container" class="editor-container"></div>
       <div id="statusbar" class="statusbar">

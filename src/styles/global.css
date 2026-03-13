@@ -173,54 +173,57 @@ button:focus:not(:focus-visible) {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 0;
+  padding: 10px 10px 14px;
+  font-size: 13px;
   user-select: none;
 }
 
 /* Each item wrapper (holds row + children) */
 .tree-item {
-  /* no special styles needed on wrapper */
+  position: relative;
 }
 
 /* Clickable row */
 .tree-row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  font-size: 13px;
+  gap: 8px;
+  min-height: 28px;
+  padding: 4px 10px 4px 12px;
+  border-radius: 8px;
   color: var(--fg);
   cursor: pointer;
-  border-radius: 4px;
-  margin: 0 4px;
-  transition: background var(--transition-fast);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  user-select: none;
+  transition: background var(--transition-fast), color var(--transition-fast),
+              box-shadow var(--transition-fast);
 }
 
 .tree-row:hover {
-  background: var(--selection-bg);
+  background: rgba(74, 158, 255, 0.1);
 }
 
 /* Active / open file */
 .tree-row--active {
-  background: var(--accent);
-  color: #ffffff;
+  background: rgba(74, 158, 255, 0.14);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
-.tree-row--active:hover {
-  background: var(--accent-hover);
-  color: #ffffff;
+/* Folder rows: bold + accent icon */
+.tree-item[data-is-dir="true"] > .tree-row {
+  font-weight: 600;
+  color: var(--heading-fg);
 }
 
-.tree-row--active .tree-icon--file {
-  color: #ffffff;
+.tree-item[data-is-dir="true"] > .tree-row > .tree-icon,
+.tree-row--active > .tree-icon {
+  color: var(--accent);
 }
 
 /* Disabled (non-md) files */
 .tree-row--disabled {
-  opacity: 0.45;
+  color: var(--fg-muted);
+  opacity: 0.65;
   cursor: default;
 }
 
@@ -249,28 +252,28 @@ button:focus:not(:focus-visible) {
 
 /* Icon (folder or file) */
 .tree-icon {
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
   flex-shrink: 0;
-  font-size: 14px;
-  line-height: 1;
+  color: var(--fg-muted);
 }
 
 .tree-icon--file {
   font-size: 10px;
   font-weight: 700;
   font-family: var(--font-mono);
-  color: var(--fg-muted);
 }
 
 /* Label text */
 .tree-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Item-count badge for folders */
@@ -286,12 +289,37 @@ button:focus:not(:focus-visible) {
   line-height: 16px;
 }
 
-/* Children container — animated expand/collapse */
+/* Children container with connection lines */
 .tree-children {
+  position: relative;
+  margin-left: 10px;
+  padding-left: 14px;
   overflow: hidden;
   max-height: 0;
   opacity: 0;
   transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+/* Vertical connection line */
+.tree-children::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  bottom: 6px;
+  width: 1px;
+  background: rgba(127, 127, 127, 0.35);
+}
+
+/* Horizontal connection line from vertical to each child */
+.tree-children > .tree-item > .tree-row::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  width: 9px;
+  height: 1px;
+  background: rgba(127, 127, 127, 0.45);
 }
 
 .tree-item--open > .tree-children {
@@ -301,10 +329,52 @@ button:focus:not(:focus-visible) {
 
 /* Empty / error message */
 .tree-empty {
+  padding: 6px 12px 6px 22px;
   font-size: 12px;
   color: var(--fg-muted);
-  padding: 4px 14px;
   font-style: italic;
+}
+
+/* ============================================================
+   Sidebar Resizer
+   ============================================================ */
+.sidebar-resizer {
+  width: 8px;
+  flex-shrink: 0;
+  position: relative;
+  cursor: col-resize;
+  background: transparent;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.sidebar-resizer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  border-radius: 999px;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+.sidebar-resizer:hover::before,
+body.sidebar-resizing .sidebar-resizer::before {
+  background: rgba(74, 158, 255, 0.4);
+}
+
+.sidebar.hidden + .sidebar-resizer,
+.sidebar-resizer.hidden {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.sidebar-resizing,
+body.sidebar-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
 }
 
 /* ============================================================
@@ -438,12 +508,217 @@ button:focus:not(:focus-visible) {
   border-color: var(--accent);
 }
 
+/* Sidebar toggle button in toolbar */
+.toolbar-sidebar-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-size: 14px;
+  width: 32px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.toolbar-sidebar-btn:hover {
+  background: var(--selection-bg);
+  color: var(--fg);
+}
+
+.toolbar-sidebar-btn.active {
+  background: rgba(74, 158, 255, 0.15);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* Viewer mode toolbar: more compact and visually lighter */
 .toolbar--viewer {
   height: 32px;
   min-height: 32px;
   background: var(--editor-bg);
   border-bottom-color: transparent;
+}
+
+/* ============================================================
+   Tab Bar
+   ============================================================ */
+.tabbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 6px 10px 0;
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tabbar-list {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.tabbar-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabbar-tab {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  max-width: 240px;
+  margin-bottom: -1px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: var(--sidebar-bg);
+  color: var(--fg-muted);
+  cursor: grab;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.tabbar-tab:hover {
+  background: var(--editor-bg);
+  color: var(--fg);
+}
+
+.tabbar-tab--active {
+  background: var(--content-bg);
+  border-color: var(--border);
+  color: var(--fg);
+  box-shadow: 0 -1px 0 rgba(74, 158, 255, 0.12);
+}
+
+.tabbar-tab-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 9px 12px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: grab;
+  font: inherit;
+}
+
+.tabbar-tab-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.tabbar-tab-dirty {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.tabbar-tab-close,
+.tabbar-new {
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tabbar-tab-close {
+  width: 28px;
+  margin: 4px 4px 4px 0;
+  border-radius: 6px;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.tabbar-tab-close:hover,
+.tabbar-new:hover {
+  background: var(--selection-bg);
+  color: var(--fg);
+}
+
+.tabbar-new {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+/* Tab drag states */
+.tabbar-tab--dragging {
+  opacity: 0.45;
+}
+
+.tabbar-tab--drop-before {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.tabbar-tab--drop-after {
+  box-shadow: inset -3px 0 0 var(--accent);
+}
+
+body.viewer-mode .tabbar {
+  background: var(--editor-bg);
+}
+
+/* ============================================================
+   Tab Context Menu
+   ============================================================ */
+.tab-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 190px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--content-bg);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
+}
+
+.tab-context-menu-item {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--fg);
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tab-context-menu-item:hover:not(:disabled) {
+  background: var(--selection-bg);
+}
+
+.tab-context-menu-item:disabled {
+  color: var(--fg-muted);
+  cursor: default;
+}
+
+.tab-context-menu-sep {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--border);
 }
 
 /* --- Editor container --- */

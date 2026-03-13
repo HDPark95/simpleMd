@@ -1,6 +1,6 @@
 /**
  * Main renderer entry point for SimpleMD.
- * Wires together CodeMirror editor, sidebar, outline, statusbar, toolbar, and features.
+ * Wires together CodeMirror editor, sidebar, outline, statusbar, toolbar, tabs, and features.
  */
 
 import { createEditor, SimpleMDEditor } from './editor/index'
@@ -10,6 +10,15 @@ import { initOutline, updateOutline, highlightHeading } from './components/outli
 import { initStatusbar, updateStatus, updateStatusMode } from './components/statusbar'
 import { initToolbar, setToolbarMode } from './components/toolbar'
 import { initTheme, setTheme } from './editor/theme'
+import {
+  initTabBar,
+  openFileInTab,
+  createBlankTab,
+  updateActiveTabState,
+  getActiveTabState,
+  handleTabKeyboard,
+  type TabState,
+} from './components/tabbar'
 
 // ---------------------------------------------------------------------------
 // State
@@ -108,6 +117,70 @@ Enjoy writing!
 `
 
 // ---------------------------------------------------------------------------
+// Sidebar resize
+// ---------------------------------------------------------------------------
+
+const SIDEBAR_WIDTH_KEY = 'simplemd-sidebar-width'
+const DEFAULT_SIDEBAR_WIDTH = 250
+const MIN_SIDEBAR_WIDTH = 180
+const MAX_SIDEBAR_WIDTH = 520
+
+let preferredSidebarWidth = DEFAULT_SIDEBAR_WIDTH
+
+function normalizeSidebarWidth(w: number): number {
+  return Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, w))
+}
+
+function applySidebarWidth(width: number, persist = false): void {
+  preferredSidebarWidth = normalizeSidebarWidth(width)
+  const sidebar = document.getElementById('sidebar')
+  if (sidebar && !sidebar.classList.contains('hidden')) {
+    sidebar.style.width = `${preferredSidebarWidth}px`
+    sidebar.style.minWidth = `${preferredSidebarWidth}px`
+    sidebar.style.maxWidth = `${preferredSidebarWidth}px`
+  }
+  if (persist) {
+    localStorage.setItem(SIDEBAR_WIDTH_KEY, String(preferredSidebarWidth))
+  }
+}
+
+function initSidebarResize(): void {
+  // Load persisted width
+  const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY)
+  if (saved) preferredSidebarWidth = normalizeSidebarWidth(parseInt(saved, 10))
+
+  const resizer = document.getElementById('sidebar-resizer')
+  const app = document.getElementById('app')
+  if (!resizer || !app) return
+
+  resizer.addEventListener('mousedown', (e: MouseEvent) => {
+    if (e.button !== 0) return
+    e.preventDefault()
+    document.body.classList.add('sidebar-resizing')
+    const appLeft = app.getBoundingClientRect().left
+
+    const onMove = (ev: MouseEvent) => {
+      const nextWidth = ev.clientX - appLeft
+      applySidebarWidth(nextWidth, true)
+    }
+
+    const onUp = () => {
+      document.body.classList.remove('sidebar-resizing')
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp, { once: true })
+  })
+
+  // Double-click to reset width
+  resizer.addEventListener('dblclick', () => {
+    applySidebarWidth(DEFAULT_SIDEBAR_WIDTH, true)
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Helper functions
 // ---------------------------------------------------------------------------
 
@@ -121,6 +194,7 @@ function setModified(modified: boolean): void {
   isModified = modified
   updateStatus({ modified })
   updateWindowTitle()
+  updateActiveTabState({ isModified: modified })
 }
 
 function scheduleAutoSave(): void {
@@ -177,16 +251,10 @@ async function saveFile(saveAs = false): Promise<void> {
     updateStatus({ file: result })
     setActiveFile(result)
     updateWindowTitle()
+    updateActiveTabState({ filePath: result, title: result.split('/').pop() || 'Untitled' })
   }
 }
 
-/**
- * Load content into the editor.
- * @param filePath   - Path of the opened file, or null for untitled/welcome.
- * @param content    - Markdown content to display.
- * @param viewerMode - Whether to open in read-only viewer mode (default: true for
- *                     real files, false for untitled/welcome content).
- */
 function showRecentFiles(): void {
   // Remove existing overlay if any
   document.querySelector('.recent-files-overlay')?.remove()
@@ -274,7 +342,6 @@ function showRecentFiles(): void {
 
 async function openFromHistory(filePath: string): Promise<void> {
   if (!window.simplemd) return
-  await autoSaveIfNeeded()
   const content = await window.simplemd.file.read(filePath)
   if (content !== null) {
     openContent(filePath, content)
@@ -290,29 +357,47 @@ async function autoSaveIfNeeded(): Promise<void> {
   }
 }
 
+/**
+ * Load content into the editor via tabs.
+ */
 function openContent(filePath: string | null, content: string, viewerMode?: boolean): void {
-  currentFilePath = filePath
-  if (filePath) addToHistory(filePath)
-  editor.setContent(content)
-  setModified(false)
+  const mode = viewerMode !== undefined ? viewerMode : filePath !== null
+  openFileInTab(filePath, content, mode)
+}
+
+/**
+ * Restore a tab's state into the editor — called by the tab system.
+ */
+function restoreTabToEditor(tab: TabState): void {
+  currentFilePath = tab.filePath
+  if (tab.filePath) addToHistory(tab.filePath)
+
+  editor.setContent(tab.content)
+  isModified = tab.isModified
+
   updateWindowTitle()
-  const words = countWords(content)
+  const words = countWords(tab.content)
   updateStatus({
-    file: filePath || '',
-    modified: false,
+    file: tab.filePath || '',
+    modified: tab.isModified,
     words: words.words,
     chars: words.chars,
   })
-  updateOutline(extractHeadings(content))
+  updateOutline(extractHeadings(tab.content))
 
-  // Determine mode: caller can override; otherwise files default to viewer,
-  // untitled/welcome content defaults to edit.
-  const targetMode = viewerMode !== undefined ? viewerMode : filePath !== null
-  applyMode(targetMode)
+  applyMode(tab.isViewerMode)
 
-  if (!isViewerMode) {
-    editor.view.focus()
+  // Restore scroll position
+  requestAnimationFrame(() => {
+    editor.view.scrollDOM.scrollTop = tab.scrollTop
+  })
+
+  if (tab.filePath) {
+    setActiveFile(tab.filePath)
   }
+
+  // Update sidebar toggle button state
+  updateSidebarToggleState()
 }
 
 function applyFormat(action: string): void {
@@ -371,6 +456,36 @@ function applyFormat(action: string): void {
 }
 
 // ---------------------------------------------------------------------------
+// Sidebar toggle
+// ---------------------------------------------------------------------------
+
+function toggleSidebar(): void {
+  const sidebar = document.getElementById('sidebar')
+  const resizer = document.getElementById('sidebar-resizer')
+  if (!sidebar) return
+
+  const isHidden = sidebar.classList.contains('hidden')
+  sidebar.classList.toggle('hidden')
+
+  if (isHidden) {
+    // Showing sidebar — apply persisted width
+    applySidebarWidth(preferredSidebarWidth)
+    resizer?.classList.remove('hidden')
+  } else {
+    resizer?.classList.add('hidden')
+  }
+
+  updateSidebarToggleState()
+}
+
+function updateSidebarToggleState(): void {
+  const sidebar = document.getElementById('sidebar')
+  const btn = document.getElementById('btn-toggle-sidebar')
+  if (!sidebar || !btn) return
+  btn.classList.toggle('active', !sidebar.classList.contains('hidden'))
+}
+
+// ---------------------------------------------------------------------------
 // Initialize
 // ---------------------------------------------------------------------------
 
@@ -410,9 +525,11 @@ function init(): void {
     },
   }
 
+  // Initialize sidebar resize
+  initSidebarResize()
+
   // Initialize UI components
   initSidebar(async (path, content) => {
-    await autoSaveIfNeeded()
     openContent(path, content)
   })
 
@@ -431,6 +548,32 @@ function init(): void {
     (action) => { applyFormat(action) },
     () => { toggleMode() },
   )
+
+  // Initialize tab bar
+  initTabBar({
+    onActivate: (tab) => restoreTabToEditor(tab),
+    onCreate: (tab) => restoreTabToEditor(tab),
+    onClose: async (tab) => {
+      if (!tab.isModified) return true
+      // Simple confirm dialog
+      return confirm(`"${tab.title}" has unsaved changes. Close anyway?`)
+    },
+    onSaveState: () => ({
+      content: editor.getContent(),
+      filePath: currentFilePath,
+      isModified,
+      scrollTop: editor.view.scrollDOM.scrollTop,
+      isViewerMode,
+      title: currentFilePath ? currentFilePath.split('/').pop() || 'Untitled' : 'Untitled',
+    }),
+  })
+
+  // Sidebar toggle button
+  const sidebarToggleBtn = document.getElementById('btn-toggle-sidebar')
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', toggleSidebar)
+    sidebarToggleBtn.addEventListener('mousedown', (e) => e.preventDefault())
+  }
 
   // Listen for custom editor events
   window.addEventListener('editor:cursor', ((e: CustomEvent) => {
@@ -454,10 +597,13 @@ function init(): void {
   }) as EventListener)
 
   // --------------------------------------------------
-  // Keyboard shortcut: Cmd+E (or Ctrl+E on Windows/Linux) to toggle mode
+  // Keyboard shortcuts
   // --------------------------------------------------
 
   window.addEventListener('keydown', (e) => {
+    // Tab shortcuts first (Ctrl+T, Ctrl+W, Ctrl+Tab, Ctrl+Shift+T)
+    if (handleTabKeyboard(e)) return
+
     const isMod = e.metaKey || e.ctrlKey
     if (isMod && e.key === 'e') {
       e.preventDefault()
@@ -466,6 +612,11 @@ function init(): void {
     if (isMod && e.key === 'r') {
       e.preventDefault()
       showRecentFiles()
+    }
+    // Cmd+\: toggle sidebar
+    if (isMod && e.key === '\\') {
+      e.preventDefault()
+      toggleSidebar()
     }
     // Cmd+Shift+V: toggle viewer mode
     if (isMod && e.shiftKey && e.key === 'v') {
@@ -488,11 +639,10 @@ function init(): void {
   const ipc = window.simplemd ?? null
 
   if (ipc) {
-    ipc.on('menu:new', async () => { await autoSaveIfNeeded(); openContent(null, '') })
+    ipc.on('menu:new', () => { createBlankTab() })
     ipc.on('menu:toggleViewerMode', () => toggleMode())
 
     ipc.on('menu:open', async () => {
-      await autoSaveIfNeeded()
       const result = await ipc.file.open()
       if (result) {
         openContent(result.filePath, result.content)
@@ -573,6 +723,11 @@ function init(): void {
       editor.openSearch()
     })
 
+    // Sidebar toggle from menu
+    ipc.on('menu:toggleSidebar', () => {
+      toggleSidebar()
+    })
+
     // --------------------------------------------------
     // Open file from main process (command line arg)
     // --------------------------------------------------
@@ -646,10 +801,10 @@ function init(): void {
   } // end if (ipc)
 
   // --------------------------------------------------
-  // Welcome text — open in edit mode so new users can start typing immediately
+  // Welcome text — open as first tab
   // --------------------------------------------------
 
-  openContent(null, WELCOME_TEXT, false)
+  openFileInTab(null, WELCOME_TEXT, false)
 }
 
 // Boot
