@@ -5,7 +5,7 @@
 
 import { createEditor, SimpleMDEditor } from './editor/index'
 import { extractHeadings, countWords } from './editor/markdown'
-import { initSidebar, setActiveFile } from './components/sidebar'
+import { initSidebar, setActiveFile, openFolderForFile } from './components/sidebar'
 import { initOutline, updateOutline, highlightHeading } from './components/outline'
 import { initStatusbar, updateStatus, updateStatusMode } from './components/statusbar'
 import { initToolbar, setToolbarMode } from './components/toolbar'
@@ -22,6 +22,26 @@ let editor: SimpleMDEditor
 
 /** Whether the app is currently in viewer (read-only) mode. */
 let isViewerMode = false
+
+/** Recent file history (most recent first, max 20) */
+const MAX_HISTORY = 20
+let fileHistory: string[] = []
+
+function loadHistory(): void {
+  try {
+    const raw = localStorage.getItem('simplemd-file-history')
+    if (raw) fileHistory = JSON.parse(raw)
+  } catch { /* ignore */ }
+}
+
+function saveHistory(): void {
+  localStorage.setItem('simplemd-file-history', JSON.stringify(fileHistory))
+}
+
+function addToHistory(filePath: string): void {
+  fileHistory = [filePath, ...fileHistory.filter(p => p !== filePath)].slice(0, MAX_HISTORY)
+  saveHistory()
+}
 
 const AUTO_SAVE_DELAY = 2000
 
@@ -167,8 +187,112 @@ async function saveFile(saveAs = false): Promise<void> {
  * @param viewerMode - Whether to open in read-only viewer mode (default: true for
  *                     real files, false for untitled/welcome content).
  */
+function showRecentFiles(): void {
+  // Remove existing overlay if any
+  document.querySelector('.recent-files-overlay')?.remove()
+
+  if (fileHistory.length === 0) return
+
+  const overlay = document.createElement('div')
+  overlay.className = 'recent-files-overlay'
+
+  const panel = document.createElement('div')
+  panel.className = 'recent-files-panel'
+
+  const title = document.createElement('div')
+  title.className = 'recent-files-title'
+  title.textContent = 'Recent Files'
+  panel.appendChild(title)
+
+  let selectedIdx = 0
+
+  const items: HTMLElement[] = []
+
+  for (let i = 0; i < fileHistory.length; i++) {
+    const fp = fileHistory[i]
+    const item = document.createElement('div')
+    item.className = 'recent-files-item'
+    if (i === 0) item.classList.add('selected')
+    if (fp === currentFilePath) item.classList.add('current')
+
+    const name = fp.split('/').pop() || fp
+    const dir = fp.substring(0, fp.lastIndexOf('/'))
+
+    item.innerHTML = `<span class="recent-files-name">${name}</span><span class="recent-files-path">${dir}</span>`
+
+    item.addEventListener('click', () => {
+      close()
+      openFromHistory(fp)
+    })
+    item.addEventListener('mouseenter', () => {
+      items[selectedIdx]?.classList.remove('selected')
+      selectedIdx = i
+      item.classList.add('selected')
+    })
+
+    panel.appendChild(item)
+    items.push(item)
+  }
+
+  overlay.appendChild(panel)
+
+  function close() {
+    overlay.remove()
+    document.removeEventListener('keydown', onKey)
+  }
+
+  function onKey(e: KeyboardEvent) {
+    if (e.key === 'Escape') { close(); return }
+    if (e.key === 'ArrowDown' || (e.key === 'r' && (e.metaKey || e.ctrlKey))) {
+      e.preventDefault()
+      items[selectedIdx]?.classList.remove('selected')
+      selectedIdx = (selectedIdx + 1) % items.length
+      items[selectedIdx]?.classList.add('selected')
+      items[selectedIdx]?.scrollIntoView({ block: 'nearest' })
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      items[selectedIdx]?.classList.remove('selected')
+      selectedIdx = (selectedIdx - 1 + items.length) % items.length
+      items[selectedIdx]?.classList.add('selected')
+      items[selectedIdx]?.scrollIntoView({ block: 'nearest' })
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      close()
+      openFromHistory(fileHistory[selectedIdx])
+    }
+  }
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close()
+  })
+
+  document.addEventListener('keydown', onKey)
+  document.body.appendChild(overlay)
+}
+
+async function openFromHistory(filePath: string): Promise<void> {
+  if (!window.simplemd) return
+  await autoSaveIfNeeded()
+  const content = await window.simplemd.file.read(filePath)
+  if (content !== null) {
+    openContent(filePath, content)
+    openFolderForFile(filePath)
+  }
+}
+
+async function autoSaveIfNeeded(): Promise<void> {
+  if (isModified && currentFilePath && window.simplemd) {
+    const content = editor.getContent()
+    await window.simplemd.file.save({ filePath: currentFilePath, content })
+    setModified(false)
+  }
+}
+
 function openContent(filePath: string | null, content: string, viewerMode?: boolean): void {
   currentFilePath = filePath
+  if (filePath) addToHistory(filePath)
   editor.setContent(content)
   setModified(false)
   updateWindowTitle()
@@ -251,6 +375,7 @@ function applyFormat(action: string): void {
 // ---------------------------------------------------------------------------
 
 function init(): void {
+  loadHistory()
   const container = document.getElementById('editor-container')
   if (!container) return
 
@@ -286,7 +411,8 @@ function init(): void {
   }
 
   // Initialize UI components
-  initSidebar((path, content) => {
+  initSidebar(async (path, content) => {
+    await autoSaveIfNeeded()
     openContent(path, content)
   })
 
@@ -337,6 +463,10 @@ function init(): void {
       e.preventDefault()
       toggleMode()
     }
+    if (isMod && e.key === 'r') {
+      e.preventDefault()
+      showRecentFiles()
+    }
     // Cmd+Shift+V: toggle viewer mode
     if (isMod && e.shiftKey && e.key === 'v') {
       e.preventDefault()
@@ -358,14 +488,15 @@ function init(): void {
   const ipc = window.simplemd ?? null
 
   if (ipc) {
-    ipc.on('menu:new', () => openContent(null, ''))
+    ipc.on('menu:new', async () => { await autoSaveIfNeeded(); openContent(null, '') })
     ipc.on('menu:toggleViewerMode', () => toggleMode())
 
     ipc.on('menu:open', async () => {
+      await autoSaveIfNeeded()
       const result = await ipc.file.open()
       if (result) {
         openContent(result.filePath, result.content)
-        setActiveFile(result.filePath)
+        openFolderForFile(result.filePath)
       }
     })
 
@@ -451,7 +582,7 @@ function init(): void {
       if (data) {
         const viewerMode = data.mode === 'view' ? true : undefined
         openContent(data.filePath, data.content, viewerMode)
-        if (data.filePath) setActiveFile(data.filePath)
+        if (data.filePath) openFolderForFile(data.filePath)
 
         // Jump to line number if specified (--line flag from CLI)
         if (data.line && data.line > 0) {
@@ -464,6 +595,26 @@ function init(): void {
             scrollIntoView: true,
           })
         }
+      }
+    })
+
+    // --------------------------------------------------
+    // File changed externally — reload content
+    // --------------------------------------------------
+
+    ipc.on('file:changed', (...args: unknown[]) => {
+      const data = args[0] as { filePath: string; content: string }
+      if (data && data.filePath === currentFilePath && !isModified) {
+        // Save scroll position
+        const scroller = editor.view.scrollDOM
+        const scrollTop = scroller.scrollTop
+        editor.setContent(data.content)
+        setModified(false)
+        updateOutline(extractHeadings(data.content))
+        const words = countWords(data.content)
+        updateStatus({ words: words.words, chars: words.chars })
+        // Restore scroll
+        requestAnimationFrame(() => { scroller.scrollTop = scrollTop })
       }
     })
 
@@ -489,7 +640,7 @@ function init(): void {
       const content = await ipc.file.read(filePath)
       if (content !== null) {
         openContent(filePath, content, isDiffFile ? true : undefined)
-        setActiveFile(filePath)
+        openFolderForFile(filePath)
       }
     })
   } // end if (ipc)

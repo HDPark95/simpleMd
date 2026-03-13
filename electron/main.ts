@@ -5,6 +5,26 @@ import { buildMenu } from './menu'
 
 let mainWindow: BrowserWindow | null = null
 let pendingOpenFile: string | null = null
+let currentWatcher: fs.FSWatcher | null = null
+
+function watchFile(filePath: string): void {
+  // Stop previous watcher
+  if (currentWatcher) {
+    currentWatcher.close()
+    currentWatcher = null
+  }
+
+  try {
+    currentWatcher = fs.watch(filePath, (eventType) => {
+      if (eventType === 'change' && mainWindow) {
+        try {
+          const content = fs.readFileSync(filePath, 'utf-8')
+          mainWindow.webContents.send('file:changed', { filePath, content })
+        } catch { /* file might be temporarily unavailable */ }
+      }
+    })
+  } catch { /* ignore watch errors */ }
+}
 
 function createWindow() {
   const isMac = process.platform === 'darwin'
@@ -131,6 +151,7 @@ function createWindow() {
           mode: viewMode,
           line: lineNumber,
         })
+        watchFile(absPath)
       }
     }
   })
@@ -158,6 +179,7 @@ ipcMain.handle('file:open', async () => {
 
   const filePath = result.filePaths[0]
   const content = fs.readFileSync(filePath, 'utf-8')
+  watchFile(filePath)
   return { filePath, content }
 })
 
@@ -258,6 +280,7 @@ app.on('open-file', (event, filePath) => {
   if (mainWindow && mainWindow.webContents) {
     const content = fs.readFileSync(filePath, 'utf-8')
     mainWindow.webContents.send('file:openFromMain', { filePath, content, mode: 'view' })
+    watchFile(filePath)
   } else {
     // App not ready yet — store path and open after window is created
     pendingOpenFile = filePath

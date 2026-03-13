@@ -4,6 +4,8 @@
  * with support for GFM extensions.
  */
 
+import hljs from 'highlight.js/lib/core'
+
 export interface Heading {
   level: number
   text: string
@@ -224,10 +226,18 @@ export function markdownToHtml(text: string): string {
         i++
       }
       i++ // skip closing fence
-      const langAttr = lang ? ` class="language-${lang}"` : ''
-      output.push(
-        `<pre><code${langAttr}>${escapeHtml(codeLines.join('\n'))}</code></pre>`,
-      )
+      const codeText = codeLines.join('\n')
+      let highlighted: string
+      if (lang && hljs.getLanguage(lang)) {
+        highlighted = hljs.highlight(codeText, { language: lang }).value
+      } else if (lang) {
+        highlighted = hljs.highlightAuto(codeText).value
+      } else {
+        highlighted = escapeHtml(codeText)
+      }
+      const langClass = lang ? `language-${lang} hljs` : ''
+      const classAttr = langClass ? ` class="${langClass}"` : ''
+      output.push(`<pre><code${classAttr}>${highlighted}</code></pre>`)
       continue
     }
 

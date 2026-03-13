@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld('simplemd', {
       'menu:find', 'menu:replace',
       'theme:change',
       'file:openFromMain',
+      'file:changed',
     ]
     if (validChannels.includes(channel)) {
       const handler = (_event: Electron.IpcRendererEvent, ...args: unknown[]) => callback(...args)

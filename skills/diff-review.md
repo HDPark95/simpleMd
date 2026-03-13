@@ -78,3 +78,4 @@ Rules:
 - For deleted code, show what was removed and explain the impact
 - If the diff is very large (>500 lines), prioritize showing code for the most important changes and summarize trivial ones (config, formatting) in a table
 - DO NOT just list bullet point summaries without code — the whole point is to see the actual code changes
+- DO NOT use mermaid diagrams — they break easily with special characters in code identifiers. Use plain text or tables instead for flow descriptions

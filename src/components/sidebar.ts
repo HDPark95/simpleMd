@@ -265,4 +265,39 @@ export function initSidebar(onFileOpen: (path: string, content: string) => void)
   }
 }
 
+/**
+ * Open the parent folder of a file and highlight it in the tree.
+ * Called automatically when a file is opened from disk.
+ */
+export async function openFolderForFile(filePath: string): Promise<void> {
+  const dirPath = filePath.substring(0, filePath.lastIndexOf('/'))
+  if (!dirPath) return
+
+  // Already showing this folder?
+  if (rootFolderPath === dirPath) {
+    setActiveFile(filePath)
+    return
+  }
+
+  rootFolderPath = dirPath
+  const tree = document.getElementById('file-tree')
+  if (!tree) return
+
+  tree.innerHTML = ''
+
+  const titleEl = document.querySelector('.sidebar-title')
+  if (titleEl) {
+    const folderName = dirPath.split('/').pop() || dirPath
+    titleEl.textContent = folderName
+  }
+
+  await loadChildren(dirPath, tree, 0)
+
+  const sidebar = document.getElementById('sidebar')
+  if (sidebar) sidebar.classList.remove('hidden')
+
+  // Highlight the opened file after tree is loaded
+  setActiveFile(filePath)
+}
+
 export { setActiveFile }
