@@ -10,6 +10,7 @@ import {
 import { EditorSelection, Range, StateField } from '@codemirror/state'
 import type { Extension } from '@codemirror/state'
 import { viewerModeFacet } from '../editor/wysiwyg'
+import katex from 'katex'
 
 // ---------------------------------------------------------------------------
 // Table detection helpers
@@ -122,6 +123,88 @@ function isSeparatorCell(cell: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Cell content renderer (supports inline math, bold, italic, code, links)
+// ---------------------------------------------------------------------------
+
+function renderCellContent(el: HTMLElement, text: string): void {
+  // Process inline formatting: math, bold, italic, code, links
+  // Order matters: process code first to avoid interpreting content inside backticks
+  const fragments: (string | HTMLElement)[] = []
+  let remaining = text
+
+  while (remaining.length > 0) {
+    // Inline math: $...$
+    const mathMatch = remaining.match(/^(.*?)(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)/)
+    // Inline code: `...`
+    const codeMatch = remaining.match(/^(.*?)`([^`]+)`/)
+    // Bold: **...**
+    const boldMatch = remaining.match(/^(.*?)\*\*(.+?)\*\*/)
+    // Italic: *...*
+    const italicMatch = remaining.match(/^(.*?)(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/)
+
+    // Find the earliest match
+    type MatchType = { type: string; match: RegExpMatchArray; idx: number }
+    const candidates: MatchType[] = []
+    if (mathMatch) candidates.push({ type: 'math', match: mathMatch, idx: mathMatch[1].length })
+    if (codeMatch) candidates.push({ type: 'code', match: codeMatch, idx: codeMatch[1].length })
+    if (boldMatch) candidates.push({ type: 'bold', match: boldMatch, idx: boldMatch[1].length })
+    if (italicMatch) candidates.push({ type: 'italic', match: italicMatch, idx: italicMatch[1].length })
+
+    if (candidates.length === 0) {
+      // No more patterns — add remaining text
+      if (remaining) fragments.push(remaining)
+      break
+    }
+
+    // Pick earliest match
+    candidates.sort((a, b) => a.idx - b.idx)
+    const best = candidates[0]
+    const before = best.match[1]
+    const content = best.match[2]
+
+    if (before) fragments.push(before)
+
+    if (best.type === 'math') {
+      const span = document.createElement('span')
+      try {
+        span.innerHTML = katex.renderToString(content, {
+          displayMode: false,
+          throwOnError: false,
+          output: 'html',
+        })
+      } catch {
+        span.textContent = `$${content}$`
+      }
+      fragments.push(span)
+    } else if (best.type === 'code') {
+      const code = document.createElement('code')
+      code.textContent = content
+      code.style.cssText = 'background:var(--code-bg,#f6f8fa);padding:2px 4px;border-radius:3px;font-size:0.9em;'
+      fragments.push(code)
+    } else if (best.type === 'bold') {
+      const strong = document.createElement('strong')
+      strong.textContent = content
+      fragments.push(strong)
+    } else if (best.type === 'italic') {
+      const em = document.createElement('em')
+      em.textContent = content
+      fragments.push(em)
+    }
+
+    remaining = remaining.slice(best.match[0].length)
+  }
+
+  // Append fragments to element
+  for (const frag of fragments) {
+    if (typeof frag === 'string') {
+      el.appendChild(document.createTextNode(frag))
+    } else {
+      el.appendChild(frag)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Table render widget
 // ---------------------------------------------------------------------------
 
@@ -154,7 +237,7 @@ class TableWidget extends WidgetType {
 
       row.forEach((cell) => {
         const td = document.createElement(isHeader ? 'th' : 'td')
-        td.textContent = cell
+        renderCellContent(td, cell)
         tr.appendChild(td)
       })
 

@@ -252,13 +252,8 @@ export function initSidebar(onFileOpen: (path: string, content: string) => void)
     openBtn.addEventListener('click', openFolder)
   }
 
-  // Menu: toggle sidebar visibility (Electron only)
+  // Menu: open folder (Electron only)
   if (window.simplemd) {
-    window.simplemd.on('menu:toggleSidebar', () => {
-      if (sidebar) sidebar.classList.toggle('hidden')
-    })
-
-    // Menu: open folder
     window.simplemd.on('menu:openFolder', () => {
       openFolder()
     })

@@ -287,18 +287,20 @@ function buildDecorations(view: EditorView): DecorationSet {
       const isActive = cursorLines.has(lineNum)
 
       if (!isActive) {
-        // --- Headings: hide # characters and apply styles ---
+        // --- Headings: dim # characters and apply styles ---
         const headingMatch = lineText.match(/^(#{1,6})\s/)
         if (headingMatch) {
           const level = headingMatch[1].length
           const style = HEADING_STYLES[level]
 
-          // Hide the "### " prefix
+          // Dim the "### " prefix instead of hiding it (prevents content jump on click)
           decorations.push(
-            Decoration.replace({}).range(line.from, line.from + headingMatch[0].length),
+            Decoration.mark({
+              attributes: { style: 'opacity:0.25;font-size:0.5em;' },
+            }).range(line.from, line.from + headingMatch[0].length),
           )
 
-          // Style the rest of the line
+          // Style the whole line
           decorations.push(
             Decoration.line({
               attributes: {

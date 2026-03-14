@@ -124,8 +124,9 @@ button:focus:not(:focus-visible) {
 }
 
 .sidebar.hidden {
-  width: 0;
-  min-width: 0;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
   opacity: 0;
   border-right: none;
   pointer-events: none;
@@ -779,11 +780,7 @@ body.viewer-mode .tabbar {
   color: var(--heading-fg);
 }
 
-.editor-container .cm-heading-1,
-.editor-container .cm-heading-2 {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 4px;
-}
+/* Heading border is applied via CM6 baseTheme in wysiwyg.ts */
 
 /* Tighten spacing: empty lines between content shouldn't be as tall */
 .editor-container .cm-line:empty,
