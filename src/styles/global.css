@@ -136,9 +136,10 @@ button:focus:not(:focus-visible) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  gap: 8px;
 }
 
 .sidebar-title {
@@ -147,12 +148,24 @@ button:focus:not(:focus-visible) {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--fg-muted);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .sidebar-btn {
   background: none;
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   color: var(--fg-muted);
   cursor: pointer;
   font-size: 14px;
@@ -165,7 +178,7 @@ button:focus:not(:focus-visible) {
 }
 
 .sidebar-btn:hover {
-  background: var(--border);
+  background: rgba(74, 158, 255, 0.12);
   color: var(--fg);
 }
 
@@ -232,29 +245,32 @@ button:focus:not(:focus-visible) {
   background: transparent;
 }
 
-/* Expand/collapse arrow */
+/* Expand/collapse chevron */
 .tree-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
+  width: 14px;
   flex-shrink: 0;
-  font-size: 9px;
   color: var(--fg-muted);
-  transition: transform var(--transition-fast);
+  transition: color var(--transition-fast);
+}
+
+.tree-row:hover .tree-arrow {
+  color: var(--fg);
 }
 
 /* Spacer in place of arrow for files (keeps alignment) */
 .tree-arrow-spacer {
   display: inline-block;
-  width: 16px;
+  width: 14px;
   flex-shrink: 0;
 }
 
 /* Icon (folder or file) */
 .tree-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -262,10 +278,13 @@ button:focus:not(:focus-visible) {
   color: var(--fg-muted);
 }
 
+.tree-icon--folder {
+  color: var(--accent);
+}
+
 .tree-icon--file {
-  font-size: 10px;
-  font-weight: 700;
-  font-family: var(--font-mono);
+  color: var(--fg-muted);
+  opacity: 0.7;
 }
 
 /* Label text */
@@ -275,19 +294,6 @@ button:focus:not(:focus-visible) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Item-count badge for folders */
-.tree-badge {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--fg-muted);
-  background: var(--border);
-  border-radius: 8px;
-  padding: 0 5px;
-  margin-left: auto;
-  flex-shrink: 0;
-  line-height: 16px;
 }
 
 /* Children container with connection lines */
@@ -720,6 +726,137 @@ body.viewer-mode .tabbar {
   height: 1px;
   margin: 4px 2px;
   background: var(--border);
+}
+
+/* ============================================================
+   Search / Find & Replace Panel
+   ============================================================ */
+.cm-panels {
+  border-color: var(--border) !important;
+  background: var(--toolbar-bg) !important;
+}
+
+.cm-panels.cm-panels-top {
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.cm-search.cm-panel {
+  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  background: var(--toolbar-bg);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+/* Input fields */
+.cm-search.cm-panel input[type="text"],
+.cm-search.cm-panel input[type="search"],
+.cm-search.cm-panel input.cm-textfield {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  background: var(--content-bg);
+  color: var(--fg);
+  outline: none;
+  min-width: 180px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cm-search.cm-panel input[type="text"]:focus,
+.cm-search.cm-panel input[type="search"]:focus,
+.cm-search.cm-panel input.cm-textfield:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+}
+
+/* Buttons */
+.cm-search.cm-panel button {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  background: var(--content-bg);
+  color: var(--fg);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+              color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.cm-search.cm-panel button:hover {
+  background: rgba(74, 158, 255, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cm-search.cm-panel button:active {
+  background: rgba(74, 158, 255, 0.2);
+}
+
+/* Close button */
+.cm-search.cm-panel button[name="close"] {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: 16px;
+  margin-left: auto;
+}
+
+.cm-search.cm-panel button[name="close"]:hover {
+  background: rgba(74, 158, 255, 0.12);
+  color: var(--fg);
+  border: none;
+}
+
+/* Checkboxes */
+.cm-search.cm-panel label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cm-search.cm-panel label:hover {
+  color: var(--fg);
+}
+
+.cm-search.cm-panel input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+}
+
+/* Row layout: wrap nicely on narrow widths */
+.cm-search.cm-panel br {
+  display: none;
+}
+
+/* Match highlight */
+.cm-searchMatch {
+  background: rgba(255, 213, 0, 0.35) !important;
+  border-radius: 2px;
+}
+
+.cm-searchMatch-selected {
+  background: rgba(255, 140, 0, 0.45) !important;
+  border-radius: 2px;
 }
 
 /* --- Editor container --- */

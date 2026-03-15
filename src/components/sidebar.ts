@@ -5,34 +5,22 @@
 
 /* ── Icon helpers ─────────────────────────────────────────── */
 
-const FILE_ICONS: Record<string, string> = {
-  '.md': '📝',
-  '.markdown': '📝',
-  '.json': '{ }',
-  '.ts': 'TS',
-  '.tsx': 'TX',
-  '.js': 'JS',
-  '.jsx': 'JX',
-  '.css': '#',
-  '.html': '<>',
-  '.yml': 'Y',
-  '.yaml': 'Y',
-  '.toml': 'T',
-  '.xml': '<>',
-  '.svg': '◇',
-  '.png': '▣',
-  '.jpg': '▣',
-  '.jpeg': '▣',
-  '.gif': '▣',
-  '.txt': '≡',
+/* ── SVG Icon helpers ─────────────────────────────────────── */
+
+const FOLDER_ICON = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="color:var(--accent)"><path d="M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z"/></svg>`
+const FOLDER_OPEN_ICON = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="color:var(--accent)"><path d="M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v.5H2.5a1 1 0 00-.994.89l-.476 4.29A1.5 1.5 0 002.5 13h11a1.5 1.5 0 001.48-1.32l.78-5a.5.5 0 00-.49-.58H2V5.5a.5.5 0 01.5-.5h4.12a.5.5 0 00.354-.146l1.207-1.208A.5.5 0 008.535 3.5H2.5a.5.5 0 00-.5.5v8.5z"/></svg>`
+const FILE_MD_ICON = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zM9.5 3A1.5 1.5 0 018 1.5V0H4a1 1 0 00-1 1v14a1 1 0 001 1h8a1 1 0 001-1V4.5H9.5z"/><path d="M4.5 12.5A.5.5 0 015 12h3.5v-2l1.5 2.5L11.5 10v2H12a.5.5 0 010 1H5a.5.5 0 01-.5-.5z"/></svg>`
+const FILE_ICON = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zM9.5 3A1.5 1.5 0 018 1.5V0H4a1 1 0 00-1 1v14a1 1 0 001 1h8a1 1 0 001-1V4.5H9.5z"/></svg>`
+const CHEVRON_RIGHT = `<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"/></svg>`
+const CHEVRON_DOWN = `<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 01.708 0L8 10.293l5.646-5.647a.5.5 0 01.708.708l-6 6a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z"/></svg>`
+
+function isMarkdown(name: string): boolean {
+  const lower = name.toLowerCase()
+  return lower.endsWith('.md') || lower.endsWith('.markdown') || lower.endsWith('.txt')
 }
 
-function getFileIcon(name: string): string {
-  const lower = name.toLowerCase()
-  for (const [ext, icon] of Object.entries(FILE_ICONS)) {
-    if (lower.endsWith(ext)) return icon
-  }
-  return '📄'
+function getFileIconSvg(name: string): string {
+  return isMarkdown(name) ? FILE_MD_ICON : FILE_ICON
 }
 
 /* ── State ────────────────────────────────────────────────── */
@@ -60,33 +48,27 @@ function createFileNode(entry: FileEntry, container: HTMLElement, depth: number)
 
   const row = document.createElement('div')
   row.className = 'tree-row'
-  row.style.paddingLeft = `${8 + depth * 18}px`
+  row.style.paddingLeft = `${12 + depth * 16}px`
 
   if (entry.isDirectory) {
-    // Arrow toggle
+    // Chevron toggle
     const arrow = document.createElement('span')
     arrow.className = 'tree-arrow'
-    arrow.textContent = '▶'
+    arrow.innerHTML = CHEVRON_RIGHT
 
     // Folder icon
     const icon = document.createElement('span')
     icon.className = 'tree-icon tree-icon--folder'
-    icon.textContent = '📁'
+    icon.innerHTML = FOLDER_ICON
 
     // Label
     const label = document.createElement('span')
     label.className = 'tree-label'
     label.textContent = entry.name
 
-    // Badge (item count) — filled after first load
-    const badge = document.createElement('span')
-    badge.className = 'tree-badge'
-    badge.style.display = 'none'
-
     row.appendChild(arrow)
     row.appendChild(icon)
     row.appendChild(label)
-    row.appendChild(badge)
     item.appendChild(row)
 
     const children = document.createElement('div')
@@ -99,20 +81,16 @@ function createFileNode(entry: FileEntry, container: HTMLElement, depth: number)
       const isOpen = item.classList.contains('tree-item--open')
       if (!isOpen) {
         item.classList.add('tree-item--open')
-        arrow.textContent = '▼'
-        icon.textContent = '📂'
+        arrow.innerHTML = CHEVRON_DOWN
+        icon.innerHTML = FOLDER_OPEN_ICON
         if (!loaded) {
           loaded = true
-          const count = await loadChildren(entry.path, children, depth + 1)
-          if (count > 0) {
-            badge.textContent = String(count)
-            badge.style.display = ''
-          }
+          await loadChildren(entry.path, children, depth + 1)
         }
       } else {
         item.classList.remove('tree-item--open')
-        arrow.textContent = '▶'
-        icon.textContent = '📁'
+        arrow.innerHTML = CHEVRON_RIGHT
+        icon.innerHTML = FOLDER_ICON
       }
     })
   } else {
@@ -123,7 +101,7 @@ function createFileNode(entry: FileEntry, container: HTMLElement, depth: number)
     // File icon
     const icon = document.createElement('span')
     icon.className = 'tree-icon tree-icon--file'
-    icon.textContent = getFileIcon(entry.name)
+    icon.innerHTML = getFileIconSvg(entry.name)
 
     // Label
     const label = document.createElement('span')
@@ -135,8 +113,8 @@ function createFileNode(entry: FileEntry, container: HTMLElement, depth: number)
     row.appendChild(label)
     item.appendChild(row)
 
-    // Only allow opening .md files
-    if (entry.name.endsWith('.md') || entry.name.endsWith('.markdown')) {
+    // Allow opening markdown/text files
+    if (isMarkdown(entry.name)) {
       row.addEventListener('click', async () => {
         if (!window.simplemd) return
         const content = await window.simplemd.file.read(entry.path)
@@ -237,19 +215,34 @@ async function openFolder(): Promise<void> {
   // Make sure sidebar is visible
   const sidebar = document.getElementById('sidebar')
   if (sidebar) sidebar.classList.remove('hidden')
+  const resizer = document.getElementById('sidebar-resizer')
+  if (resizer) resizer.classList.remove('hidden')
 }
 
 /* ── Public init ──────────────────────────────────────────── */
 
-export function initSidebar(onFileOpen: (path: string, content: string) => void): void {
-  onFileOpenCb = onFileOpen
+let closeSidebarCb: (() => void) | null = null
 
-  const sidebar = document.getElementById('sidebar')
+export function initSidebar(
+  onFileOpen: (path: string, content: string) => void,
+  onCloseSidebar?: () => void,
+): void {
+  onFileOpenCb = onFileOpen
+  closeSidebarCb = onCloseSidebar || null
 
   // Open folder button
   const openBtn = document.getElementById('btn-open-folder')
   if (openBtn) {
     openBtn.addEventListener('click', openFolder)
+  }
+
+  // Close sidebar button
+  const closeBtn = document.getElementById('btn-close-sidebar')
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      if (closeSidebarCb) closeSidebarCb()
+    })
+    closeBtn.addEventListener('mousedown', (e) => e.preventDefault())
   }
 
   // Menu: open folder (Electron only)
@@ -290,6 +283,8 @@ export async function openFolderForFile(filePath: string): Promise<void> {
 
   const sidebar = document.getElementById('sidebar')
   if (sidebar) sidebar.classList.remove('hidden')
+  const resizer = document.getElementById('sidebar-resizer')
+  if (resizer) resizer.classList.remove('hidden')
 
   // Highlight the opened file after tree is loaded
   setActiveFile(filePath)

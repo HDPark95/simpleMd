@@ -529,9 +529,10 @@ function init(): void {
   initSidebarResize()
 
   // Initialize UI components
-  initSidebar(async (path, content) => {
-    openContent(path, content)
-  })
+  initSidebar(
+    async (path, content) => { openContent(path, content) },
+    () => { toggleSidebar() },
+  )
 
   initOutline((line) => {
     const lineInfo = editor.view.state.doc.line(line)

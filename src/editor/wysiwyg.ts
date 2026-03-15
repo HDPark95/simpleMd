@@ -209,10 +209,10 @@ class BulletWidget extends WidgetType {
 // ----- Heading size map -----
 
 const HEADING_STYLES: Record<number, { fontSize: string; fontWeight: string }> = {
-  1: { fontSize: '2em', fontWeight: '700' },
-  2: { fontSize: '1.5em', fontWeight: '700' },
-  3: { fontSize: '1.25em', fontWeight: '600' },
-  4: { fontSize: '1.1em', fontWeight: '600' },
+  1: { fontSize: '2.2em', fontWeight: '800' },
+  2: { fontSize: '1.7em', fontWeight: '700' },
+  3: { fontSize: '1.35em', fontWeight: '700' },
+  4: { fontSize: '1.15em', fontWeight: '600' },
   5: { fontSize: '1.05em', fontWeight: '600' },
   6: { fontSize: '1em', fontWeight: '600' },
 }
@@ -287,20 +287,18 @@ function buildDecorations(view: EditorView): DecorationSet {
       const isActive = cursorLines.has(lineNum)
 
       if (!isActive) {
-        // --- Headings: dim # characters and apply styles ---
+        // --- Headings: hide # prefix and apply large styles ---
         const headingMatch = lineText.match(/^(#{1,6})\s/)
         if (headingMatch) {
           const level = headingMatch[1].length
           const style = HEADING_STYLES[level]
 
-          // Dim the "### " prefix instead of hiding it (prevents content jump on click)
+          // Hide the "### " prefix
           decorations.push(
-            Decoration.mark({
-              attributes: { style: 'opacity:0.25;font-size:0.5em;' },
-            }).range(line.from, line.from + headingMatch[0].length),
+            Decoration.replace({}).range(line.from, line.from + headingMatch[0].length),
           )
 
-          // Style the whole line
+          // Style the rest of the line
           decorations.push(
             Decoration.line({
               attributes: {
@@ -624,7 +622,18 @@ export const wysiwygPlugin = ViewPlugin.fromClass(
         update.viewportChanged ||
         update.transactions.some((tr) => tr.reconfigured)
       ) {
+        // Preserve scroll position when decorations change due to cursor movement
+        // (e.g., clicking on a heading toggles # prefix visibility, shifting content)
+        const scrollDOM = update.view.scrollDOM
+        const prevScroll = scrollDOM.scrollTop
+
         this.decorations = buildDecorations(update.view)
+
+        if (update.selectionSet && !update.docChanged) {
+          requestAnimationFrame(() => {
+            scrollDOM.scrollTop = prevScroll
+          })
+        }
       }
     }
   },
