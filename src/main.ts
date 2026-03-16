@@ -368,10 +368,11 @@ function openContent(filePath: string | null, content: string, viewerMode?: bool
 /**
  * Restore a tab's state into the editor — called by the tab system.
  */
-function restoreTabToEditor(tab: TabState): void {
+async function restoreTabToEditor(tab: TabState): Promise<void> {
   currentFilePath = tab.filePath
   if (tab.filePath) addToHistory(tab.filePath)
 
+  await editor.setLanguageForFile(tab.filePath)
   editor.setContent(tab.content)
   isModified = tab.isModified
 
@@ -385,7 +386,17 @@ function restoreTabToEditor(tab: TabState): void {
   })
   updateOutline(extractHeadings(tab.content))
 
-  applyMode(tab.isViewerMode)
+  const isCodeMode = editor.getEditorMode() === 'code'
+  if (isCodeMode) {
+    // Code mode: always editable, hide markdown toolbar
+    isViewerMode = false
+    editor.setReadOnly(false)
+    document.body.classList.remove('viewer-mode')
+    setToolbarMode(false, true)
+    updateStatusMode(false)
+  } else {
+    applyMode(tab.isViewerMode)
+  }
 
   // Restore scroll position
   requestAnimationFrame(() => {
@@ -790,7 +801,10 @@ function init(): void {
       if (!files || files.length === 0) return
       const file = files[0]
       const isDiffFile = file.name.endsWith('.diff') || file.name.endsWith('.patch')
-      if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown') && !isDiffFile) return
+      // Accept any text-based file via drag & drop
+      const textExts = ['.md','.markdown','.txt','.sql','.json','.yaml','.yml','.toml','.xml','.csv','.js','.ts','.jsx','.tsx','.py','.rb','.go','.rs','.java','.html','.css','.scss','.sh','.bash','.env','.ini','.cfg','.conf','.log','.diff','.patch','.c','.cpp','.h','.php','.lua','.r','.swift','.kt']
+      const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+      if (!textExts.includes(ext)) return
       const filePath = (file as File & { path?: string }).path
       if (!filePath) return
       const content = await ipc.file.read(filePath)

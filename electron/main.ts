@@ -7,6 +7,49 @@ let mainWindow: BrowserWindow | null = null
 let pendingOpenFile: string | null = null
 let currentWatcher: fs.FSWatcher | null = null
 
+// ----- Single instance lock -----
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (_event, argv) => {
+    // Another instance tried to launch — find the file arg and open it in existing window
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+
+      // Find file path in argv (skip electron binary and app path)
+      const fileArg = argv.find(arg => {
+        const lower = arg.toLowerCase()
+        return (lower.endsWith('.md') || lower.endsWith('.markdown') || lower.endsWith('.txt') ||
+                lower.endsWith('.sql') || lower.endsWith('.json') || lower.endsWith('.yaml') ||
+                lower.endsWith('.yml') || lower.endsWith('.js') || lower.endsWith('.ts') ||
+                lower.endsWith('.py') || lower.endsWith('.html') || lower.endsWith('.css') ||
+                lower.endsWith('.diff') || lower.endsWith('.patch') ||
+                arg.startsWith('--md-file')) && !arg.startsWith('-')
+      })
+
+      const mdFileIdx = argv.indexOf('--md-file')
+      const filePath = mdFileIdx !== -1 && argv[mdFileIdx + 1]
+        ? argv[mdFileIdx + 1]
+        : fileArg
+
+      if (filePath && fs.existsSync(filePath)) {
+        const absPath = path.isAbsolute(filePath) ? filePath : path.resolve(filePath)
+        const content = fs.readFileSync(absPath, 'utf-8')
+        const isDiff = absPath.endsWith('.diff') || absPath.endsWith('.patch') || content.startsWith('diff --git ')
+        mainWindow.webContents.send('file:openFromMain', {
+          filePath: absPath,
+          content,
+          mode: isDiff ? 'view' : 'edit',
+        })
+        watchFile(absPath)
+      }
+    }
+  })
+}
+
 function watchFile(filePath: string): void {
   // Stop previous watcher
   if (currentWatcher) {
@@ -82,10 +125,15 @@ function createWindow() {
       fileArg = argv[mdFileIdx + 1]
     } else {
       // Legacy: bare file path anywhere in argv
-      fileArg = argv.find(arg =>
-        arg.endsWith('.md') || arg.endsWith('.markdown') || arg.endsWith('.txt') ||
-        arg.endsWith('.diff') || arg.endsWith('.patch')
-      )
+      fileArg = argv.find(arg => {
+        if (arg.startsWith('-')) return false
+        const lower = arg.toLowerCase()
+        const ext = lower.slice(lower.lastIndexOf('.'))
+        const supported = ['.md','.markdown','.txt','.sql','.json','.yaml','.yml','.toml','.xml',
+          '.js','.ts','.jsx','.tsx','.py','.html','.css','.scss','.sh','.bash',
+          '.java','.go','.rs','.c','.cpp','.h','.rb','.php','.swift','.diff','.patch','.log','.env','.conf']
+        return supported.includes(ext)
+      })
     }
 
     const mdModeIdx = argv.indexOf('--md-mode')
@@ -116,7 +164,6 @@ function createWindow() {
     // Check for pending open-file event (macOS Finder double-click before window ready)
     if (pendingOpenFile) {
       fileArg = pendingOpenFile
-      viewMode = 'view'
       pendingOpenFile = null
     }
 
@@ -170,6 +217,7 @@ ipcMain.handle('file:open', async () => {
     properties: ['openFile'],
     filters: [
       { name: 'Markdown', extensions: ['md', 'markdown', 'txt'] },
+      { name: 'Code', extensions: ['sql', 'js', 'ts', 'py', 'json', 'yaml', 'yml', 'html', 'css', 'sh'] },
       { name: 'Diff / Patch', extensions: ['diff', 'patch'] },
       { name: 'All Files', extensions: ['*'] }
     ]
@@ -274,12 +322,13 @@ ipcMain.handle('export:pdf', async () => {
   return true
 })
 
-// macOS: handle file open from Finder (double-click .md file)
+// macOS: handle file open from Finder (double-click any supported file)
 app.on('open-file', (event, filePath) => {
   event.preventDefault()
   if (mainWindow && mainWindow.webContents) {
     const content = fs.readFileSync(filePath, 'utf-8')
-    mainWindow.webContents.send('file:openFromMain', { filePath, content, mode: 'view' })
+    const isDiff = filePath.endsWith('.diff') || filePath.endsWith('.patch') || content.startsWith('diff --git ')
+    mainWindow.webContents.send('file:openFromMain', { filePath, content, mode: isDiff ? 'view' : 'edit' })
     watchFile(filePath)
   } else {
     // App not ready yet — store path and open after window is created

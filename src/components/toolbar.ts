@@ -67,25 +67,35 @@ export function initToolbar(
  * In viewer mode: show the "Edit" button, hide format buttons and "View" button.
  * In edit mode: show format buttons and "View" button, hide "Edit" button.
  */
-export function setToolbarMode(isViewer: boolean): void {
+export function setToolbarMode(isViewer: boolean, isCodeMode = false): void {
   const toolbar = document.getElementById('toolbar')
   const editBtn = document.getElementById('toolbar-edit-btn')
   const viewBtn = document.getElementById('toolbar-view-btn')
   const formatGroup = document.getElementById('toolbar-format-buttons')
+  const modeToggle = document.querySelector('.toolbar-mode-toggle') as HTMLElement
 
   if (!editBtn || !viewBtn || !formatGroup) return
 
-  if (isViewer) {
+  if (isCodeMode) {
+    // Code mode: hide all markdown-specific toolbar items
+    formatGroup.style.display = 'none'
+    editBtn.style.display = 'none'
+    viewBtn.style.display = 'none'
+    if (modeToggle) modeToggle.style.display = 'none'
+    toolbar?.classList.remove('toolbar--viewer')
+  } else if (isViewer) {
     // Viewer mode: prominent "Edit" button, hide format buttons and "View" button
     editBtn.style.display = ''
     formatGroup.style.display = 'none'
     viewBtn.style.display = 'none'
+    if (modeToggle) modeToggle.style.display = ''
     toolbar?.classList.add('toolbar--viewer')
   } else {
     // Edit mode: show format buttons and "View" button, hide "Edit" button
     editBtn.style.display = 'none'
     formatGroup.style.display = ''
     viewBtn.style.display = ''
+    if (modeToggle) modeToggle.style.display = ''
     toolbar?.classList.remove('toolbar--viewer')
   }
 }

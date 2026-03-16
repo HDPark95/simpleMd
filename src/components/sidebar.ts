@@ -14,6 +14,26 @@ const FILE_ICON = `<svg width="14" height="14" viewBox="0 0 16 16" fill="current
 const CHEVRON_RIGHT = `<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"/></svg>`
 const CHEVRON_DOWN = `<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 01.708 0L8 10.293l5.646-5.647a.5.5 0 01.708.708l-6 6a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z"/></svg>`
 
+const TEXT_EXTENSIONS = new Set([
+  '.md', '.markdown', '.txt',
+  '.sql', '.json', '.yaml', '.yml', '.toml', '.xml', '.csv', '.tsv',
+  '.js', '.ts', '.jsx', '.tsx', '.mjs', '.cjs',
+  '.py', '.rb', '.go', '.rs', '.java', '.kt', '.swift', '.c', '.cpp', '.h', '.hpp', '.cs',
+  '.html', '.css', '.scss', '.less', '.sass',
+  '.sh', '.bash', '.zsh', '.fish', '.bat', '.ps1',
+  '.env', '.ini', '.cfg', '.conf', '.properties',
+  '.diff', '.patch', '.log',
+  '.r', '.lua', '.pl', '.php', '.ex', '.exs', '.hs', '.clj', '.scala',
+  '.dockerfile', '.gitignore', '.editorconfig',
+])
+
+function isOpenable(name: string): boolean {
+  const lower = name.toLowerCase()
+  const dotIdx = lower.lastIndexOf('.')
+  if (dotIdx === -1) return false
+  return TEXT_EXTENSIONS.has(lower.slice(dotIdx))
+}
+
 function isMarkdown(name: string): boolean {
   const lower = name.toLowerCase()
   return lower.endsWith('.md') || lower.endsWith('.markdown') || lower.endsWith('.txt')
@@ -113,8 +133,8 @@ function createFileNode(entry: FileEntry, container: HTMLElement, depth: number)
     row.appendChild(label)
     item.appendChild(row)
 
-    // Allow opening markdown/text files
-    if (isMarkdown(entry.name)) {
+    // Allow opening text-based files
+    if (isOpenable(entry.name)) {
       row.addEventListener('click', async () => {
         if (!window.simplemd) return
         const content = await window.simplemd.file.read(entry.path)
